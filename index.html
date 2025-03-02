@@ -4,10 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>IndoSpace Sistema FAT Map</title>
-    
+
     <!-- MapLibre CSS -->
     <link href="https://unpkg.com/maplibre-gl@3.x/dist/maplibre-gl.css" rel="stylesheet" />
-    
+
+    <!-- Open Sans font for map labels -->
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap" rel="stylesheet">
+
     <style>
         body { margin: 0; padding: 0; }
         #map { position: absolute; top: 0; bottom: 0; width: 100%; }
@@ -24,8 +27,9 @@
             box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
             max-width: 300px;
             max-height: 300px;
+            z-index: 1;
         }
-        .map-overlay h2 {
+        .map-overlay h2, .map-overlay h3 {
             margin: 0 0 10px;
             font-size: 16px;
         }
@@ -40,6 +44,8 @@
 
     <!-- MapLibre JS -->
     <script src="https://unpkg.com/maplibre-gl@3.x/dist/maplibre-gl.js"></script>
+
+    <!-- Load data first, then map script -->
     <script src="data.js"></script>
     <script src="map.js"></script>
 </body>
