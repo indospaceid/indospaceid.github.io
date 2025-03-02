@@ -1,10 +1,11 @@
-// map.js - With OpenStreetMap vector tiles
+// map.js - With OpenStreetMap vector tiles and auto-zoom
 
 // Wait for both the map and data to be ready
 document.addEventListener('DOMContentLoaded', function() {
     console.log("DOM loaded, initializing map...");
     console.log(`Data loaded: ${pointCount} points available`);
     console.log(`Map will be centered at: [${mapCenter[0]}, ${mapCenter[1]}]`);
+    console.log(`Map bounds: SW [${mapBounds.southwest}], NE [${mapBounds.northeast}]`);
 
     // Define the OSM vector tile style
     const osmStyle = {
@@ -105,7 +106,7 @@ document.addEventListener('DOMContentLoaded', function() {
         container: 'map',
         style: osmStyle,
         center: mapCenter,
-        zoom: 14
+        zoom: 12 // Initial zoom, will be adjusted
     });
 
     // Add navigation controls
@@ -120,7 +121,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <h3>Debug Info</h3>
         <p>Points loaded: ${pointCount}</p>
         <p>Map center: [${mapCenter[0].toFixed(6)}, ${mapCenter[1].toFixed(6)}]</p>
-        <p>Zoom level: <span id="zoom-level">14</span></p>
+        <p>Zoom level: <span id="zoom-level">12</span></p>
         <p>Status: <span id="load-status">Loading...</span></p>
     `;
     document.body.appendChild(debugOverlay);
@@ -156,6 +157,17 @@ document.addEventListener('DOMContentLoaded', function() {
 
             document.getElementById('load-status').textContent = 'Data loaded successfully';
             console.log("Data layer added successfully");
+
+            // Fit the map to show all points with padding
+            const bounds = new maplibregl.LngLatBounds(
+                [mapBounds.southwest[0], mapBounds.southwest[1]],
+                [mapBounds.northeast[0], mapBounds.northeast[1]]
+            );
+
+            map.fitBounds(bounds, {
+                padding: 50, // Add some padding around the bounds
+                maxZoom: 16  // Don't zoom in too far
+            });
 
             // Add a popup on hover
             const popup = new maplibregl.Popup({
