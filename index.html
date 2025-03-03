@@ -304,11 +304,21 @@
         // // Fit map to bounds of data
         // map.fitBounds(geoJsonLayer.getBounds());
 
-        // Fit map to bounds of data with some padding
-        map.fitBounds(geoJsonLayer.getBounds(), {
-          padding: [50, 50],
-          maxZoom: 15
-        });
+        // // Fit map to bounds of data with some padding
+        // map.fitBounds(geoJsonLayer.getBounds(), {
+        //   padding: [50, 50],
+        //   maxZoom: 15
+        // });
+
+        // Wait for the map to be fully loaded before fitting bounds
+        setTimeout(() => {
+          if (data.features.length > 0) {
+            map.fitBounds(geoJsonLayer.getBounds(), {
+              padding: [50, 50],
+              maxZoom: 15
+            });
+          }
+        }, 100);
 
         // Update dashboard with statistics
         updateDashboard(data);
