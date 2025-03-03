@@ -95,7 +95,7 @@
           <div id="bts-distribution">Memuat...</div>
         </div>
         <div class="card">
-          <h3>Tiper Barrel</h3>
+          <h3>Tipe Barrel</h3>
           <div id="barrel-types">Memuat...</div>
         </div>
       </div>
@@ -174,7 +174,7 @@
       };
       info.update = function (props) {
         this._div.innerHTML =
-          "<h4>Telecom Infrastructure Info</h4>" +
+          "<h4>Info Infrastruktur Indospace</h4>" +
           (props
             ? `<b>${props.FAT || "N/A"}</b><br>
                     BTS: ${props.BTS || "N/A"}<br>
@@ -183,7 +183,7 @@
                     Available Ports: ${props["Sisa Port"] || "N/A"}<br>
                     Barrel Type: ${props.Barel || "N/A"}<br>
                     Location: ${props["Last Update"] || "N/A"}`
-            : "Hover over a point");
+            : "Arahkan mouse di atas point");
       };
       info.addTo(map);
 
