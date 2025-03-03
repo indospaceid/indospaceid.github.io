@@ -138,17 +138,14 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
     <script>
-      // Initialize the map
-      const map = L.map("map");
+      // Initialize the map centered on Jakarta
+      const map = L.map("map").setView([-6.2, 106.8], 11);
 
       // Add OpenStreetMap tile layer
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
         attribution:
           '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
       }).addTo(map);
-
-      // Set a default view until data loads
-      map.setView([-2.5, 118], 5); // Indonesia view
 
       // Create a legend
       const legend = L.control({ position: "bottomright" });
@@ -161,7 +158,7 @@
                 <i style="background: #3498db"></i> 4-6 Jml. Port Tersedia<br>
                 <i style="background: #2ecc71"></i> 7+ Jml. Port Tersedia<br>
                 <hr>
-                <i style="border-radius: 50%; border: 2px solid black"></i> UPC Barrel<br>
+                <i style="border-radius: 50%; border: 2px solid black"></i> UPC Barrel<br><br>
                 <i style="border-radius: 0; border: 2px solid black"></i> APC Barrel
             `;
         return div;
@@ -197,12 +194,6 @@
         if (availablePorts >= 4 && availablePorts <= 6) return "#3498db"; // Blue for medium
         return "#2ecc71"; // Green for high availability
       }
-
-      // Global variable to store the GeoJSON layer
-      let geoJsonLayer;
-
-      // Global variable to store the data
-      let telecomData;
 
       // Function to create markers
       function createMarker(feature, latlng) {
@@ -275,6 +266,52 @@
         }</p>
                 </div>
             `;
+      }
+
+      // Global variable to store the GeoJSON layer
+      let geoJsonLayer;
+
+      // Global variable to store the data
+      let telecomData;
+
+      // Function to load GeoJSON data from file
+      function loadGeoJsonData() {
+        fetch("telecom_data.geojson")
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error("Network response was not ok");
+            }
+            return response.json();
+          })
+          .then((data) => {
+            telecomData = data;
+            processData(data);
+          })
+          .catch((error) => {
+            console.error("Error loading GeoJSON data:", error);
+            document.querySelector(".loader").innerHTML =
+              "Error loading data. Please check console for details.";
+          });
+      }
+
+      // Function to process and display the data
+      function processData(data) {
+        // Add GeoJSON layer to map
+        geoJsonLayer = L.geoJSON(data, {
+          pointToLayer: createMarker,
+        }).addTo(map);
+
+        // Fit map to bounds of data
+        map.fitBounds(geoJsonLayer.getBounds());
+
+        // Update dashboard with statistics
+        updateDashboard(data);
+
+        // Populate filter options
+        populateFilters(data);
+
+        // Remove loader
+        document.querySelector(".loader").style.display = "none";
       }
 
       // Function to update dashboard with statistics
@@ -392,14 +429,6 @@
           pointToLayer: createMarker,
         }).addTo(map);
 
-        // If there are filtered features, fit the map to them
-        if (filteredData.features.length > 0) {
-          map.fitBounds(geoJsonLayer.getBounds(), {
-            padding: [50, 50],
-            maxZoom: 15
-          });
-        }
-
         // Update dashboard with filtered data
         updateDashboard(filteredData);
 
@@ -409,47 +438,6 @@
         document.getElementById(
           "total-points"
         ).textContent = `${totalFiltered} of ${totalOriginal}`;
-      }
-
-      // Function to load GeoJSON data from file
-      function loadGeoJsonData() {
-        fetch("telecom_data.geojson")
-          .then((response) => {
-            if (!response.ok) {
-              throw new Error("Network response was not ok");
-            }
-            return response.json();
-          })
-          .then((data) => {
-            telecomData = data;
-            
-            // Add GeoJSON layer to map
-            geoJsonLayer = L.geoJSON(data, {
-              pointToLayer: createMarker,
-            }).addTo(map);
-
-            // Fit map to bounds of data
-            if (data.features.length > 0) {
-              map.fitBounds(geoJsonLayer.getBounds(), {
-                padding: [50, 50],
-                maxZoom: 15
-              });
-            }
-
-            // Update dashboard with statistics
-            updateDashboard(data);
-
-            // Populate filter options
-            populateFilters(data);
-
-            // Remove loader
-            document.querySelector(".loader").style.display = "none";
-          })
-          .catch((error) => {
-            console.error("Error loading GeoJSON data:", error);
-            document.querySelector(".loader").innerHTML =
-              "Error loading data. Please check console for details.";
-          });
       }
 
       // Load data when page loads
