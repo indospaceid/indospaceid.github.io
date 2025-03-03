@@ -139,8 +139,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
     <script>
       // Initialize the map centered on Jakarta
-      const map = L.map("map").setView([-6.2, 106.8], 11);
-
+      // const map = L.map("map").setView([-6.2, 106.8], 11);
+      const map = L.map("map");
       // Add OpenStreetMap tile layer
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
         attribution:
@@ -301,8 +301,14 @@
           pointToLayer: createMarker,
         }).addTo(map);
 
-        // Fit map to bounds of data
-        map.fitBounds(geoJsonLayer.getBounds());
+        // // Fit map to bounds of data
+        // map.fitBounds(geoJsonLayer.getBounds());
+
+        // Fit map to bounds of data with some padding
+        map.fitBounds(geoJsonLayer.getBounds(), {
+          padding: [50, 50],
+          maxZoom: 15
+        });
 
         // Update dashboard with statistics
         updateDashboard(data);
@@ -429,6 +435,14 @@
           pointToLayer: createMarker,
         }).addTo(map);
 
+        // If there are filtered features, fit the map to them
+        if (filteredData.features.length > 0) {
+          map.fitBounds(geoJsonLayer.getBounds(), {
+            padding: [50, 50],
+            maxZoom: 15
+          });
+        }
+
         // Update dashboard with filtered data
         updateDashboard(filteredData);
 
@@ -441,7 +455,33 @@
       }
 
       // Load data when page loads
-      loadGeoJsonData();
+      // loadGeoJsonData();
+      function loadGeoJsonData() {
+        fetch("telecom_data.geojson")
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error("Network response was not ok");
+            }
+            return response.json();
+          })
+          .then((data) => {
+            telecomData = data;
+            if (data.features.length > 0) {
+              processData(data);
+            } else {
+              // If no data, center on Indonesia with a default view
+              map.setView([-2.5, 118], 5);
+              document.querySelector(".loader").innerHTML = "No data available.";
+            }
+          })
+          .catch((error) => {
+            console.error("Error loading GeoJSON data:", error);
+            document.querySelector(".loader").innerHTML =
+              "Error loading data. Please check console for details.";
+            // Set default view on error
+            map.setView([-2.5, 118], 5);
+          });
+      }
     </script>
   </body>
 </html>
